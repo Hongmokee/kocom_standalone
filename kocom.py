@@ -283,8 +283,8 @@ def parse(hex_data):
 
 
 def thermo_parse(value):
-    ret = { 'heat_mode': 'heat' if value[:2]=='11' else 'off',
-            'away': 'true' if value[2:4]=='01' else 'false',
+    ret = { 'heat_mode': 'heat' if value[2:4]=='00' else 'off',
+            #'away': 'true' if value[2:4]=='01' else 'false',
             'set_temp': int(value[4:6], 16) if value[:2]=='11' else int(config.get('User', 'init_temp')),
             'cur_temp': int(value[8:10], 16)}
     return ret
@@ -405,13 +405,13 @@ def mqtt_on_message(mqttc, obj, msg):
 
     # thermo heat/off : kocom/room/thermo/3/heat_mode/command
     if 'thermo' in topic_d and 'heat_mode' in topic_d:
-        heatmode_dic = {'heat': '11', 'off': '01'} 
+        heatmode_dic = {'heat': '00', 'off': '01'} 
 
         dev_id = device_h_dic['thermo']+'{0:02x}'.format(int(topic_d[3]))
         q = query(dev_id)
         #settemp_hex = q['value'][4:6] if q['flag']!=False else '14'
         settemp_hex = '{0:02x}'.format(int(config.get('User', 'init_temp'))) if q['flag']!=False else '14'
-        value = heatmode_dic.get(command) + '00' + settemp_hex + '0000000000' 
+        value = '11' + heatmode_dic.get(command) + settemp_hex + '0000000000' 
         send_wait_response(dest=dev_id, value=value, log='thermo heatmode')
 
     # thermo set temp : kocom/room/thermo/3/set_temp/command
