@@ -446,7 +446,7 @@ def mqtt_on_message(mqttc, obj, msg):
     # gas off : kocom/livingroom/gas/command
     elif 'gas' in topic_d:
         dev_id = device_h_dic['gas'] + room_h_dic.get(topic_d[1])
-        if command == 'off':
+        if command == 'CLOSE':
             send_wait_response(dest=dev_id, cmd=cmd_h_dic.get(command), log='gas')
         else:
             logging.info('You can only turn off gas.')
@@ -598,14 +598,14 @@ def publish_discovery(dev, sub=''):
         if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
             logging.info(logtxt)
     elif dev == 'gas':
-        topic = 'homeassistant/gas/kocom_wallpad_gas/config'
+        topic = 'homeassistant/valve/kocom_wallpad_gas/config'
         payload = {
             'name': 'Kocom Wallpad Gas',
             'cmd_t': 'kocom/livingroom/gas/command',
             'stat_t': 'kocom/livingroom/gas/state',
             'val_tpl': '{{ value_json.state }}',
-            'pl_on': 'on',
-            'pl_off': 'off',
+            'pl_on': 'OPEN',
+            'pl_off': 'CLOSE',
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
             'device': {
