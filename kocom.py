@@ -591,14 +591,17 @@ def publish_discovery(dev, sub=''):
         if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
             logging.info(logtxt)
     elif dev == 'gas':
-        topic = 'homeassistant/switch/kocom_wallpad_gas/config'
+        topic = 'homeassistant/valve/kocom_wallpad_gas/config'
         payload = {
             'name': 'Kocom Wallpad Gas',
             'cmd_t': 'kocom/livingroom/gas/command',
             'stat_t': 'kocom/livingroom/gas/state',
             'val_tpl': '{{ value_json.state }}',
-            'pl_on': 'on',
-            'pl_off': 'off',
+            'pl_open': null,
+            'pl_cls': 'off',
+            'stat_open': 'on',
+            'stat_clsd': 'off',
+            'pos': false,
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
             'device': {
