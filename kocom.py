@@ -602,7 +602,7 @@ def publish_discovery(dev, sub=''):
             'stat_open': 'on',
             'stat_clsd': 'off',
             'dev_cla': 'gas',
-            'pos': false,
+            'pos': False,
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
             'device': {
