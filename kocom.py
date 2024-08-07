@@ -597,7 +597,7 @@ def publish_discovery(dev, sub=''):
             'cmd_t': 'kocom/livingroom/gas/command',
             'stat_t': 'kocom/livingroom/gas/state',
             'val_tpl': '{{ value_json.state }}',
-            'pl_open': null,
+            'pl_open': None,
             'pl_cls': 'off',
             'stat_open': 'on',
             'stat_clsd': 'off',
