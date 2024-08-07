@@ -462,8 +462,8 @@ def mqtt_on_message(mqttc, obj, msg):
                 return
        
             threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_on)).start()
-            if config.get('Elevator', 'rs485_floor', fallback=None) == None:
-                threading.Timer(5, mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
+            # if config.get('Elevator', 'rs485_floor', fallback=None) == None:
+                # threading.Timer(5, mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
  
         elif command == 'off':
             threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
@@ -618,7 +618,7 @@ def publish_discovery(dev, sub=''):
         if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
             logging.info(logtxt)
     elif dev == 'elevator':
-        topic = 'homeassistant/switch/kocom_wallpad_elevator/config'
+        topic = 'homeassistant/button/kocom_wallpad_elevator/config'
         payload = {
             'name': 'Kocom Wallpad Elevator',
             'cmd_t': "kocom/myhome/elevator/command",
@@ -626,6 +626,8 @@ def publish_discovery(dev, sub=''):
             'val_tpl': "{{ value_json.state }}",
             'pl_on': 'on',
             'pl_off': 'off',
+            'stat_on': 'on',
+            'stat_off: 'off',
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
             'device': {
