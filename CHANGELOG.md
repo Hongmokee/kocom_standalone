@@ -1,3 +1,3 @@
-2024.03.12 paho-mqtt-2.0.0 지원
+2024.07.07
 
-Home Assistant Supervisor Add-on에서 실행되도록 수정
+가스 차단 밸브를, Switch에서 valve로 변경하고, gas class 적용
