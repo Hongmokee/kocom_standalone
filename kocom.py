@@ -601,6 +601,7 @@ def publish_discovery(dev, sub=''):
             'pl_cls': 'off',
             'stat_open': 'on',
             'stat_clsd': 'off',
+            'dev_cla': 'gas'
             'pos': false,
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
