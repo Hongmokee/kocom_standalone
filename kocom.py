@@ -641,7 +641,7 @@ def publish_discovery(dev, sub=''):
             'val_tpl': "{{ value_json.state }}",
             'evt_typ': ['call','arrived'],
             'qos': 0,
-            'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
+            'uniq_id': '{}_{}_{}_event'.format('kocom', 'wallpad', dev),
             'device': {
                 'name': '코콤 스마트 월패드',
                 'ids': 'kocom_smart_wallpad',
