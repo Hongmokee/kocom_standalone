@@ -627,7 +627,7 @@ def publish_discovery(dev, sub=''):
             'pl_on': 'on',
             'pl_off': 'off',
             'stat_on': 'on',
-            'stat_off: 'off',
+            'stat_off': 'off',
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
             'device': {
