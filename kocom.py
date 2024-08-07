@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.08'
+SW_VERSION = '2024.03.12'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -445,10 +445,11 @@ def mqtt_on_message(mqttc, obj, msg):
         else:
             logging.info('You can only turn off gas.')
 
-    # elevator on : kocom/myhome/elevator/command
+    # elevator on/off : kocom/myhome/elevator/command
     elif 'elevator' in topic_d:
         dev_id = device_h_dic['elevator'] + room_h_dic.get(topic_d[1])
-        state_call = json.dumps({'state': 'call'})
+        state_on = json.dumps({'state': 'on'})
+        state_off = json.dumps({'state': 'off'})
         if command == 'on':
             ret_elevator = None
             if config.get('Elevator', 'type', fallback='rs485') == 'rs485':
@@ -460,9 +461,12 @@ def mqtt_on_message(mqttc, obj, msg):
                 logging.debug('elevator send failed')
                 return
        
-            threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_call)).start()
+            threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_on)).start()
             # if config.get('Elevator', 'rs485_floor', fallback=None) == None:
                 # threading.Timer(5, mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
+ 
+        elif command == 'off':
+            threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
 
     # kocom/livingroom/fan/set_preset_mode/command
     elif 'fan' in topic_d and 'set_preset_mode' in topic_d:
@@ -532,9 +536,9 @@ def packet_processor(p):
         if rs485_floor != 0 :
             state = {'floor': floor}
             if rs485_floor==floor:
-                state['state'] = 'arrived'
+                state['state'] = 'off'
         else:
-            state = {'state': 'arrived'}
+            state = {'state': 'off'}
         logtxt='[MQTT publish|elevator] data[{}]'.format(state)
         mqttc.publish("kocom/myhome/elevator/state", json.dumps(state))
         # aa5530bc0044000100010300000000000000350d0d
@@ -618,7 +622,12 @@ def publish_discovery(dev, sub=''):
         payload = {
             'name': 'Kocom Wallpad Elevator',
             'cmd_t': "kocom/myhome/elevator/command",
-            'pl_prs': 'on',
+            'stat_t': "kocom/myhome/elevator/state",
+            'val_tpl': "{{ value_json.state }}",
+            'pl_on': 'on',
+            'pl_off': 'off',
+            'stat_on': 'on',
+            'stat_off': 'off',
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
             'device': {
@@ -633,26 +642,6 @@ def publish_discovery(dev, sub=''):
         mqttc.publish(topic, json.dumps(payload))
         if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
             logging.info(logtxt)
-        
-        topic_event = 'homeassistant/event/kocom_wallpad_elevator_arrival/config'
-        payload_event = {
-            'name': 'Kocom Wallpad Elevator Arrival',
-            'stat_t': "kocom/myhome/elevator/state",
-            'val_tpl': "{{ value_json.state }}",
-            'evt_typ': ['call','arrived'],
-            'qos': 0,
-            'uniq_id': '{}_{}_{}_event'.format('kocom', 'wallpad', dev),
-            'device': {
-                'name': '코콤 스마트 월패드',
-                'ids': 'kocom_smart_wallpad',
-                'mf': 'KOCOM',
-                'mdl': '스마트 월패드',
-                'sw': SW_VERSION
-            }
-        }
-
-        mqttc.publish(topic_event, json.dumps(payload_event))
-
     elif dev == 'light':
         for num in range(1, int(config.get('User', 'light_count'))+1):
             #ha_topic = 'homeassistant/light/kocom_livingroom_light1/config'
