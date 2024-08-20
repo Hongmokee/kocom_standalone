@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.20'
+SW_VERSION = '2024.08.07.12'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -573,9 +573,9 @@ def publish_discovery(dev, sub=''):
             'stat_t': 'kocom/livingroom/fan/state',
             'stat_val_tpl': '{{ value_json.state }}',
             'pct_stat_t': 'kocom/livingroom/fan/state',
-            'pct_val_tpl': per_state['{{value_json.preset}}'] ,
+            'pct_val_tpl': "{{ {'Off': 0, 'Low': 1, 'Medium': 2, 'High': 3}[value_json.fan_mode] | default('0') }}",
             'pct_cmd_t': 'kocom/livingroom/fan/set_preset_mode/command',
-            'pct_cmd_tpl': value_state['{{ value }}'],
+            'pct_cmd_tpl': "{{ {0: 'Off', 1: 'Low', 2: 'Medium', 3: 'High'}[value] | default('0') }}",
             'pl_on': 'on',
             'pl_off': 'off',
             'speed_range_min': 1,
