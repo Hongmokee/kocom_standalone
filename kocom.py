@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.07.13'
+SW_VERSION = '2024.08.07.14'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -468,7 +468,7 @@ def mqtt_on_message(mqttc, obj, msg):
         elif command == 'off':
             threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
 
-    # kocom/livingroom/fan/speed/percentage
+    # kocom/livingroom/fan/speed
     elif 'fan' in topic_d and 'speed' in topic_d:
         dev_id = device_h_dic['fan'] + room_h_dic.get(topic_d[1])
         onoff_dic = {'off':'1000', 'on':'1100'}  #onoff_dic = {'off':'0000', 'on':'1101'}
@@ -570,9 +570,9 @@ def publish_discovery(dev, sub=''):
             'stat_t': 'kocom/livingroom/fan/state',
             'stat_val_tpl': '{{ value_json.state }}',
             'pct_stat_t': 'kocom/livingroom/fan/state',
-            'pct_val_tpl': "{{ {'Off': 0, 'Low': 1, 'Medium': 2, 'High': 3}[value_json.fan_mode] | default('0') }}",
-            'pct_cmd_t': 'kocom/livingroom/fan/speed/percentage',
-            'pct_cmd_tpl': "{{ {0: 'Off', 1: 'Low', 2: 'Medium', 3: 'High'}[value] | default('Off') }}",
+            'pct_val_tpl': "{{ {'Off': 0, 'Low': '3,1', 'Medium': '3,2', 'High': '3,3'}[value_json.fan_mode] | default('0') }}",
+            'pct_cmd_t': 'kocom/livingroom/fan/speed',
+            'pct_cmd_tpl': "{{ {'0': 'Off', '3,1': 'Low', '3,2': 'Medium', '3,3': 'High'}[value] | default('Off') }}",
             'pl_on': 'on',
             'pl_off': 'off',
             'speed_range_min': 1,
