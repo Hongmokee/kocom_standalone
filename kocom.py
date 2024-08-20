@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.20.15'
+SW_VERSION = '2024.08.20.16'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -470,6 +470,7 @@ def mqtt_on_message(mqttc, obj, msg):
 
     # kocom/livingroom/fan/speed
     elif 'fan' in topic_d and 'speed' in topic_d:
+        logging.info('[fan command] {}'.format(command))
         dev_id = device_h_dic['fan'] + room_h_dic.get(topic_d[1])
         onoff_dic = {'off':'1000', 'on':'1100'}  #onoff_dic = {'off':'0000', 'on':'1101'}
         speed_dic = {'Off':'00', 'Low':'40', 'Medium':'80', 'High':'c0'}
