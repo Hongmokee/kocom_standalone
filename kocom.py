@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.07'
+SW_VERSION = '2024.08.20'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -562,6 +562,9 @@ def discovery():
 #https://www.home-assistant.io/docs/mqtt/discovery/
 #<discovery_prefix>/<component>/<object_id>/config
 def publish_discovery(dev, sub=''):
+
+    per_state = {'Off': 0, 'Low': 1, 'Medium': 2, 'High': 3}
+    value_state = {0: 'Off', 1: 'Low', 2: 'Medium', 3: 'High'}
     if dev == 'fan':
         topic = 'homeassistant/fan/kocom_wallpad_fan/config'
         payload = {
@@ -569,13 +572,14 @@ def publish_discovery(dev, sub=''):
             'cmd_t': 'kocom/livingroom/fan/command',
             'stat_t': 'kocom/livingroom/fan/state',
             'stat_val_tpl': '{{ value_json.state }}',
-            'pr_mode_stat_t': 'kocom/livingroom/fan/state',
-            'pr_mode_val_tpl': '{{ value_json.preset }}',
-            'pr_mode_cmd_t': 'kocom/livingroom/fan/set_preset_mode/command',
-            'pr_mode_cmd_tpl': '{{ value }}',
-            'pr_modes': ['Off', 'Low', 'Medium', 'High'],
+            'pct_stat_t': 'kocom/livingroom/fan/state',
+            'pct_val_tpl': per_state['{{value_json.preset}}'] ,
+            'pct_cmd_t': 'kocom/livingroom/fan/set_preset_mode/command',
+            'pct_cmd_tpl': value_state['{{ value }}'],
             'pl_on': 'on',
             'pl_off': 'off',
+            'speed_range_min': 1,
+            'speed_range_max': 3,
             'qos': 0,
             'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
             'device': {
