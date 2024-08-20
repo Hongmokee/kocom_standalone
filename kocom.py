@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.20.12'
+SW_VERSION = '2024.08.07.13'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -298,10 +298,10 @@ def light_parse(value):
 
 
 def fan_parse(value):
-    preset_dic = {'40':'Low', '80':'Medium', 'c0':'High'}
+    fanmode_dic = {'40':'Low', '80':'Medium', 'c0':'High'}
     state = 'off' if value[:2] == '10' else 'on' #state = 'off' if value[:2] == '00' else 'on'
-    preset = 'Off' if state == 'off' else preset_dic.get(value[4:6])
-    return { 'state': state, 'preset': preset}
+    fan_mode = 'Off' if state == 'off' else fanmode_dic.get(value[4:6])
+    return { 'state': state, 'fan_mode': fan_mode}
 
 
 # query device --------------------------
@@ -468,8 +468,8 @@ def mqtt_on_message(mqttc, obj, msg):
         elif command == 'off':
             threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
 
-    # kocom/livingroom/fan/set_preset_mode/command
-    elif 'fan' in topic_d and 'set_preset_mode' in topic_d:
+    # kocom/livingroom/fan/speed/percentage
+    elif 'fan' in topic_d and 'speed' in topic_d:
         dev_id = device_h_dic['fan'] + room_h_dic.get(topic_d[1])
         onoff_dic = {'off':'1000', 'on':'1100'}  #onoff_dic = {'off':'0000', 'on':'1101'}
         speed_dic = {'Off':'00', 'Low':'40', 'Medium':'80', 'High':'c0'}
@@ -562,9 +562,6 @@ def discovery():
 #https://www.home-assistant.io/docs/mqtt/discovery/
 #<discovery_prefix>/<component>/<object_id>/config
 def publish_discovery(dev, sub=''):
-
-    per_state = {'Off': 0, 'Low': 1, 'Medium': 2, 'High': 3}
-    value_state = {0: 'Off', 1: 'Low', 2: 'Medium', 3: 'High'}
     if dev == 'fan':
         topic = 'homeassistant/fan/kocom_wallpad_fan/config'
         payload = {
@@ -574,8 +571,8 @@ def publish_discovery(dev, sub=''):
             'stat_val_tpl': '{{ value_json.state }}',
             'pct_stat_t': 'kocom/livingroom/fan/state',
             'pct_val_tpl': "{{ {'Off': 0, 'Low': 1, 'Medium': 2, 'High': 3}[value_json.fan_mode] | default('0') }}",
-            'pct_cmd_t': 'kocom/livingroom/fan/set_preset_mode/command',
-            'pct_cmd_tpl': "{{ {0: 'Off', 1: 'Low', 2: 'Medium', 3: 'High'}[value] | default('0') }}",
+            'pct_cmd_t': 'kocom/livingroom/fan/speed/percentage',
+            'pct_cmd_tpl': "{{ {0: 'Off', 1: 'Low', 2: 'Medium', 3: 'High'}[value] | default('Off') }}",
             'pl_on': 'on',
             'pl_off': 'off',
             'speed_range_min': 1,
