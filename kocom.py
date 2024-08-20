@@ -468,7 +468,7 @@ def mqtt_on_message(mqttc, obj, msg):
         elif command == 'off':
             threading.Thread(target=mqttc.publish, args=("kocom/myhome/elevator/state", state_off)).start()
 
-    # kocom/livingroom/fan/speed
+    # kocom/livingroom/fan/speed/command
     elif 'fan' in topic_d and 'speed' in topic_d:
         logging.info('[command] {}'.format(command))
         dev_id = device_h_dic['fan'] + room_h_dic.get(topic_d[1])
@@ -572,7 +572,7 @@ def publish_discovery(dev, sub=''):
             'stat_val_tpl': '{{ value_json.state }}',
             'pct_stat_t': 'kocom/livingroom/fan/state',
             'pct_val_tpl': "{{ {'Off': 0, 'Low': 1, 'Medium': 2, 'High': 3}[value_json.fan_mode] | default('0') }}",
-            'pct_cmd_t': 'kocom/livingroom/fan/speed',
+            'pct_cmd_t': 'kocom/livingroom/fan/speed/command',
             'pct_cmd_tpl': "{{ value }}",
             'pl_on': 'on',
             'pl_off': 'off',
