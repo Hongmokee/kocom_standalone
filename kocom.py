@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.20.21'
+SW_VERSION = '2024.08.23.01'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -283,10 +283,25 @@ def parse(hex_data):
 
 
 def thermo_parse(value):
-    ret = { 'heat_mode': 'heat' if value[2:4]=='00' else 'off',
+    heat_mode = 'heat' if value[2:4]=='00' else 'off'
+    set_temp = int(value[4:6], 16) if value[:2]=='11' else int(config.get('User', 'init_temp'))
+    cur_temp = int(value[8:10], 16)
+
+    action = ''
+
+    if (heat_mode == 'heat' and (set_temp > cur_temp)):
+        action = 'heating'
+    elif (heat_mode == 'heat' and (set_temp <= cur_temp)):
+        action = 'idle'
+    else:
+        action = 'off'
+
+    ret = { 'heat_mode': heat_mode,
             #'away': 'true' if value[2:4]=='01' else 'false',
-            'set_temp': int(value[4:6], 16) if value[:2]=='11' else int(config.get('User', 'init_temp')),
-            'cur_temp': int(value[8:10], 16)}
+            'set_temp': set_temp,
+            'cur_temp': cur_temp,
+            'action': action
+          }
     return ret
 
 
@@ -675,6 +690,8 @@ def publish_discovery(dev, sub=''):
         topic = 'homeassistant/climate/kocom_{}_thermostat/config'.format(sub)
         payload = {
             'name': 'Kocom {} Thermostat'.format(sub),
+            'act_t': 'kocom/room/thermo/{}/state'.format(num),
+            'act_tpl' : '{{ value_json.action }}',
             'mode_stat_t': 'kocom/room/thermo/{}/state'.format(num),
             'mode_cmd_t': 'kocom/room/thermo/{}/heat_mode/command'.format(num),
             'mode_stat_tpl': '{{ value_json.heat_mode }}',
