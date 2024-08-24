@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.25.08'
+SW_VERSION = '2024.08.25.09'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -545,8 +545,8 @@ def listen_hexdata():
             continue
  
         if wait_target.empty() == False:
-            if p_ret['dest_h'] == wait_target.queue[0] and p_ret['type'] == 'ack':
-            #if p_ret['src_h'] == wait_target.queue[0] and p_ret['type'] == 'send':
+            #if p_ret['dest_h'] == wait_target.queue[0] and p_ret['type'] == 'ack':
+            if p_ret['src_h'] == wait_target.queue[0] and p_ret['type'] == 'send':
                 if len(ack_data) != 0:
                     logging.info("[ACK] No ack received, but responce packet received before ACK. Assuming ACK OK")
                     ack_q.put(d)
