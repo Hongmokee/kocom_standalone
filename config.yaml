@@ -1,6 +1,6 @@
 ---
 name: Kocom-Switch with RS485
-version: 2024.08.25.04
+version: 2024.08.25.05
 slug: kocom_py
 description: Kocom-Switch for Home Assistant
 arch:
