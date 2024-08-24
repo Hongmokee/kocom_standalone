@@ -1,5 +1,5 @@
 {
-	"name": "Home Assistant Add-on: Kocom",
-	"url": "https://github.com/Hongmokee/kocom.py",
+	"name": "Home Assistant Add-on: Kocom-switch",
+	"url": "https://github.com/Hongmokee/kocom_standalone",
 	"maintainer": "Hongmokee <kimhongm@naver.com>"
 }
