@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.25.02'
+SW_VERSION = '2024.08.25.03'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -401,7 +401,7 @@ def publish_discovery(dev, sub=''):
                 'uniq_id': '{}_{}_{}{}'.format('kocom_standalone', 'wallpad', dev, num),
                 'device': {
                     'name': '코콤용 스위치',
-                    'ids': 'kocom_switch',
+                    'ids': 'kocom_standalone',
                     'mf': '제일일렉트릭',
                     'mdl': '스위치',
                     'sw': SW_VERSION
