@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.25.06'
+SW_VERSION = '2024.08.25.07'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -281,43 +281,11 @@ def parse(hex_data):
             'flag':None}
     return ret
 
-
-def thermo_parse(value):
-    heat_mode = 'heat' if value[2:4]=='00' else 'off'
-    set_temp = int(value[4:6], 16) if value[:2]=='11' else int(config.get('User', 'init_temp'))
-    cur_temp = int(value[8:10], 16)
-
-    action = ''
-
-    if (heat_mode == 'heat' and (set_temp > cur_temp)):
-        action = 'heating'
-    elif (heat_mode == 'heat' and (set_temp <= cur_temp)):
-        action = 'idle'
-    else:
-        action = 'off'
-
-    ret = { 'heat_mode': heat_mode,
-            #'away': 'true' if value[2:4]=='01' else 'false',
-            'set_temp': set_temp,
-            'cur_temp': cur_temp,
-            'action': action
-          }
-    return ret
-
-
 def light_parse(value):
     ret = {}
     for i in range(1, int(config.get('User', 'light_count'))+1):
         ret['light_'+str(i)] = 'off' if value[i*2-2:i*2] == '00' else 'on'
     return ret
-
-
-def fan_parse(value):
-    fanmode_dic = {'40':'Low', '80':'Medium', 'c0':'High'}
-    state = 'off' if value[:2] == '10' else 'on' #state = 'off' if value[:2] == '00' else 'on'
-    fan_mode = 'Off' if state == 'off' else fanmode_dic.get(value[4:6])
-    return { 'state': state, 'fan_mode': fan_mode}
-
 
 # query device --------------------------
 
@@ -357,55 +325,6 @@ def send_wait_response(dest, src=device_h_dic['wallpad']+'00', cmd=cmd_h_dic['st
     #logging.debug('exiting send_wait_response :'+dest)
     return ret
 
-
-#===== elevator call via TCP/IP =====
-
-def call_elevator_tcpip():
-    import socket
-    sock = socket.socket()
-    sock.settimeout(10)
-
-    APT_SERVER = config.get('Elevator', 'tcpip_apt_server')
-    APT_PORT = int(config.get('Elevator', 'tcpip_apt_port'))
-
-    try:
-        sock.connect((APT_SERVER, APT_PORT))
-    except Exception as e:
-        logging.error('Apartment server socket connection failure : {} | server {}, port {}'.format(e, APT_SERVER, APT_PORT))
-        return False
-    logging.info('Apartment server socket connected | server {}, port {}'.format(APT_SERVER, APT_PORT))
-
-    try:
-        sock.send(bytearray.fromhex(config.get('Elevator', 'tcpip_packet1')))
-        rcv = sock.recv(512)
-        logging.info('recv from apt server: '+''.join("%02x" % i for i in rcv) )
-        time.sleep(0.1)
-        sock.send(bytearray.fromhex(config.get('Elevator', 'tcpip_packet2')))
-        rcv = sock.recv(512)
-        logging.info('recv from apt server: '+''.join("%02x" % i for i in rcv) )
-        sock.send(bytearray.fromhex(config.get('Elevator', 'tcpip_packet3')))
-        for itr in range(100):
-            rcv = sock.recv(512)
-            if len(rcv) == 0:
-                logging.info('apt server connection closed by peer')
-                sock.close()
-                return True
-            rcv_hex = ''.join("%02x" % i for i in rcv) 
-            logging.info('recv from apt server: '+rcv_hex )
-            if rcv_hex == config.get('Elevator', 'tcpip_packet4'):
-                logging.info('elevator arrived. sending last heartbeat' )
-                break
-        sock.send(bytearray.fromhex(config.get('Elevator', 'tcpip_packet2')))
-        rcv = sock.recv(512)
-        logging.info('recv from apt server: '+''.join("%02x" % i for i in rcv) )
-        sock.close()
-    except Exception as e:
-        logging.error('Apartment server socket communication failure : {}'.format(e))
-        return False
-
-    return True
-
-
 #===== parse MQTT --> send hex packet =====
 
 def mqtt_on_message(mqttc, obj, msg):
@@ -418,8 +337,6 @@ def mqtt_on_message(mqttc, obj, msg):
 
     logging.info("[MQTT RECV] " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
-    # thermo heat/off : kocom2/room/thermo/3/heat_mode/command
-
     # light on/off : kocom2/livingroom/light/1/command
     if 'light' in topic_d:
         dev_id = device_h_dic['light'] + room_h_dic.get(topic_d[1])
@@ -427,7 +344,7 @@ def mqtt_on_message(mqttc, obj, msg):
         onoff_hex = 'ff' if command == 'on' else '00'
         light_id = int(topic_d[3])
 
-        # turn on/off multiple lights at once : e.g) kocom/livingroom/light/12/command
+        # turn on/off multiple lights at once : e.g) kocom2/livingroom/light/12/command
         while light_id > 0:
             n = light_id % 10
             value = value[:n*2-2]+ onoff_hex + value[n*2:]
@@ -435,7 +352,7 @@ def mqtt_on_message(mqttc, obj, msg):
 
         send_wait_response(dest=dev_id, value=value, log='light')
 
-    # kocom/myhome/query/command
+    # kocom2/myhome/query/command
     elif 'query' in topic_d:
         if command == 'PRESS':
             poll_state(enforce=True)
@@ -448,13 +365,13 @@ def publish_status(p):
 
 def packet_processor(p):
     logtxt = ""
-    if p['type']=='ack' and p['src']=='wallpad':  # ack from wallpad
-    #if p['type']=='send' and p['dest']=='wallpad':  # response packet to wallpad
-        if p['dest'] == 'light' and p['cmd']=='state':
-        #elif p['src'] == 'light' and p['cmd']=='state':
+    #if p['type']=='ack' and p['src']=='wallpad':  # ack from wallpad
+    if p['type']=='send' and p['dest']=='wallpad':  # response packet to wallpad
+        #if p['dest'] == 'light' and p['cmd']=='state':
+        if p['src'] == 'light' and p['cmd']=='state':
             state = light_parse(p['value'])
             logtxt='[MQTT publish|light] data[{}]'.format(state)
-            mqttc.publish("kocom/livingroom/light/state", json.dumps(state))
+            mqttc.publish("kocom2/livingroom/light/state", json.dumps(state))
 
     if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
         logging.info(logtxt)
