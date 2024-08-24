@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.25.07'
+SW_VERSION = '2024.08.25.08'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -404,7 +404,7 @@ def publish_discovery(dev, sub=''):
                 'pl_on': 'on',
                 'pl_off': 'off',
                 'qos': 0,
-                'uniq_id': '{}_{}_{}{}'.format('kocom', 'wallpad', dev, num),
+                'uniq_id': '{}_{}_{}{}'.format('kocom2', 'wallpad', dev, num),
                 'device': {
                     'name': '코콤용 터치스위치',
                     'ids': 'kocom_switch',
@@ -423,7 +423,7 @@ def publish_discovery(dev, sub=''):
             'name': 'Kocom2 Wallpad Query',
             'cmd_t': 'kocom2/myhome/query/command',
             'qos': 0,
-            'uniq_id': '{}_{}_{}'.format('kocom', 'wallpad', dev),
+            'uniq_id': '{}_{}_{}'.format('kocom2', 'wallpad', dev),
             'device': {
                 'name': '코콤용 터치스위치',
                 'ids': 'kocom_switch',
