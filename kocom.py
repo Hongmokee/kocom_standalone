@@ -24,7 +24,7 @@ import configparser
 
 
 # define -------------------------------
-SW_VERSION = '2024.08.25.01'
+SW_VERSION = '2024.08.25.02'
 CONFIG_FILE = 'kocom.conf'
 BUF_SIZE = 100
 
@@ -38,7 +38,7 @@ chksum_position = 18  # 18th byte
 
 type_t_dic = {'30b':'send', '30d':'ack'}
 seq_t_dic = {'c':1, 'd':2, 'e':3, 'f':4}
-device_t_dic = {'0e':'light'}
+device_t_dic = {'01':'wallpad', '0e':'light'}
 cmd_t_dic = {'00':'state', '01':'on', '02':'off', '3a':'query'}
 room_t_dic = {'00':'livingroom', '01':'bedroom', '02':'room1', '03':'room2'}
 
