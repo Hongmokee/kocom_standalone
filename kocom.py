@@ -85,7 +85,7 @@ def mqtt_on_log(mqttc, obj, level, string):
 def mqtt_on_connect(mqttc, userdata, flags, rc, properties):
     if rc == 0:
         logging.info("[MQTT] Connected - 0: OK")
-        mqttc.subscribe('kocom/#', 0)
+        mqttc.subscribe('kocom_standalone/#', 0)
     else:
         logging.error("[MQTT] Connection error - {}: {}".format(rc, mqtt.connack_string(rc)))
 
@@ -337,14 +337,14 @@ def mqtt_on_message(mqttc, obj, msg):
 
     logging.info("[MQTT RECV] " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
-    # light on/off : kocom/livingroom/light/1/command
+    # light on/off : kocom_standalone/livingroom/light/1/command
     if 'light' in topic_d:
         dev_id = device_h_dic['light'] + room_h_dic.get(topic_d[1])
         value = query(dev_id)['value']
         onoff_hex = 'ff' if command == 'on' else '00'
         light_id = int(topic_d[3])
 
-        # turn on/off multiple lights at once : e.g) kocom/livingroom/light/12/command
+        # turn on/off multiple lights at once : e.g) kocom_standalone/livingroom/light/12/command
         while light_id > 0:
             n = light_id % 10
             value = value[:n*2-2]+ onoff_hex + value[n*2:]
@@ -365,7 +365,7 @@ def packet_processor(p):
         #elif p['src'] == 'light' and p['cmd']=='state':
             state = light_parse(p['value'])
             logtxt='[MQTT publish|light] data[{}]'.format(state)
-            mqttc.publish("kocom/livingroom/light/state", json.dumps(state))
+            mqttc.publish("kocom_standalone/livingroom/light/state", json.dumps(state))
 
     if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
         logging.info(logtxt)
@@ -389,21 +389,21 @@ def publish_discovery(dev, sub=''):
     if dev == 'light':
         for num in range(1, int(config.get('User', 'light_count'))+1):
             #ha_topic = 'homeassistant/light/kocom_livingroom_light1/config'
-            topic = 'homeassistant/light/kocom_livingroom_light{}/config'.format(num)
+            topic = 'homeassistant/light/kocom_standalone_livingroom_light{}/config'.format(num)
             payload = {
-                'name': 'Kocom Livingroom Light{}'.format(num),
-                'cmd_t': 'kocom/livingroom/light/{}/command'.format(num),
-                'stat_t': 'kocom/livingroom/light/state',
+                'name': 'Kocom standalone Livingroom Light{}'.format(num),
+                'cmd_t': 'kocom_standalone/livingroom/light/{}/command'.format(num),
+                'stat_t': 'kocom_standalone/livingroom/light/state',
                 'stat_val_tpl': '{{ value_json.light_' + str(num) + ' }}',
                 'pl_on': 'on',
                 'pl_off': 'off',
                 'qos': 0,
-                'uniq_id': '{}_{}_{}{}'.format('kocom', 'wallpad', dev, num),
+                'uniq_id': '{}_{}_{}{}'.format('kocom_standalone', 'wallpad', dev, num),
                 'device': {
-                    'name': '코콤 스마트 월패드',
-                    'ids': 'kocom_smart_wallpad',
-                    'mf': 'KOCOM',
-                    'mdl': '스마트 월패드',
+                    'name': '코콤용 스위치',
+                    'ids': 'kocom_switch',
+                    'mf': '제일일렉트릭',
+                    'mdl': '스위치',
                     'sw': SW_VERSION
                 }
             }
